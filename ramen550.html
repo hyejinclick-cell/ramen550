@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="description" content="눈대중으로 라면 물 550ml를 맞춰 보세요. 한국어·日本語·English">
+<meta property="og:title" content="라면 물 550">
+<meta property="og:description" content="눈대중으로 라면 물 550ml를 맞춰 보세요. 한국어·日本語·English">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<title>라면 물 550</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Kosugi+Maru&display=swap">
+<style>
+/* Layout: one-screen portrait stage — 3D kitchen fills the screen, UI floats top and bottom. Single deliberate look (pastel kitchen), not themed. */
+:root{
+  --sky-top:#cfe5ef;
+  --sky-bot:#f1f6f2;
+  --ink:#22313a;
+  --ink-soft:#5b6b73;
+  --ramen:#e0452b;
+  --pot:#e2b145;
+  --card:#fffdf8;
+  --line:#d9e2e2;
+  --display:"Jua","Kosugi Maru","Apple SD Gothic Neo","Hiragino Maru Gothic ProN","Malgun Gothic",sans-serif;
+  --body:"Gowun Dodum","Kosugi Maru","Apple SD Gothic Neo","Hiragino Sans","Malgun Gothic",sans-serif;
+}
+html,body{height:100%}
+body{
+  margin:0;overflow:hidden;color:var(--ink);font-family:var(--body);
+  background:linear-gradient(180deg,var(--sky-top),var(--sky-bot) 70%);
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+}
+#app{position:relative;height:100%;width:100%;overflow:hidden}
+#stage{position:absolute;inset:0;touch-action:none;cursor:pointer}
+#stage canvas{display:block;width:100%;height:100%}
+.top{
+  position:absolute;left:0;right:0;top:0;
+  padding-top:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;text-align:center;
+}
+.brand{font-family:var(--display);font-size:15px;letter-spacing:.06em;color:var(--ink-soft)}
+.target{font-family:var(--display);font-size:clamp(40px,12vw,60px);line-height:1;color:var(--ink)}
+.target small{font-size:.42em;margin-left:2px;color:var(--ink-soft)}
+.sub{font-size:13px;color:var(--ink-soft)}
+.best{font-size:12px;color:var(--ink-soft);background:rgba(255,255,255,.55);padding:3px 10px;border-radius:99px;font-variant-numeric:tabular-nums}
+.bottom{
+  position:absolute;left:0;right:0;bottom:0;
+  padding-bottom:22px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none;
+}
+.lang{
+  pointer-events:auto;margin-top:-8px;margin-bottom:20px;
+  display:flex;gap:2px;padding:3px;border-radius:99px;background:rgba(255,255,255,.6);
+}
+.lang button{
+  font-family:var(--display);font-size:13px;border:0;background:transparent;color:var(--ink-soft);
+  padding:6px 10px;border-radius:99px;cursor:pointer;min-width:38px;
+}
+.lang button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.lang button:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.hint{font-size:15px;color:var(--ink);background:rgba(255,255,255,.7);padding:8px 16px;border-radius:99px;transition:opacity .3s}
+.btn{
+  pointer-events:auto;font-family:var(--display);font-size:20px;border:0;border-radius:16px;
+  padding:14px 30px;cursor:pointer;transition:transform .12s,opacity .2s;
+}
+.btn:active{transform:scale(.96)}
+.btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.btn-main{background:var(--ramen);color:#fff;box-shadow:0 4px 0 #b1321c}
+.btn-ghost{background:#fff;color:var(--ink);box-shadow:0 4px 0 var(--line)}
+.btn[disabled]{opacity:.35;pointer-events:none}
+
+/* result sheet */
+.sheet{
+  position:absolute;left:0;right:0;bottom:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:18px;
+  display:flex;justify-content:center;transform:translateY(110%);transition:transform .5s cubic-bezier(.2,.9,.25,1.1);
+}
+.sheet.show{transform:none}
+.card{
+  width:100%;max-width:420px;background:var(--card);border-radius:24px;padding:20px 20px 18px;
+  box-shadow:0 10px 30px rgba(34,49,58,.18);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;
+}
+.grade{font-family:var(--display);font-size:15px;color:#fff;background:var(--ramen);padding:4px 14px;border-radius:99px}
+.ml{font-family:var(--display);font-size:clamp(52px,16vw,72px);line-height:1;font-variant-numeric:tabular-nums}
+.ml small{font-size:.38em;color:var(--ink-soft);margin-left:2px}
+.diff{font-size:16px;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
+.diff b{color:var(--ink)}
+.comment{font-size:15px;color:var(--ink);margin:4px 0 8px;text-wrap:balance}
+.row{display:flex;gap:10px;width:100%}
+.row .btn{flex:1;font-size:17px;padding:13px 10px;text-decoration:none;text-align:center}
+.btn-x{background:var(--ink);color:#fff;box-shadow:0 4px 0 #0f1a20}
+.newbest{font-size:13px;color:var(--ramen);font-family:var(--display)}
+@media (prefers-reduced-motion:reduce){.sheet{transition:none}}
+</style>
+<style>*,*::before,*::after{box-sizing:border-box} :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage" aria-label="게임 화면. 누르고 있으면 물병이 기울어져 물이 나옵니다."></div>
+
+  <div class="top">
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-l="ko" aria-pressed="false">한국어</button>
+      <button type="button" data-l="ja" aria-pressed="false">日本語</button>
+      <button type="button" data-l="en" aria-pressed="false">EN</button>
+    </div>
+    <div class="brand" id="t-brand"></div>
+    <div class="target">550<small>ml</small></div>
+    <div class="sub" id="t-sub"></div>
+    <div class="best" id="best" hidden></div>
+  </div>
+
+  <div class="bottom" id="controls">
+    <div class="hint" id="hint"></div>
+    <button class="btn btn-main" id="done" disabled></button>
+  </div>
+
+  <div class="sheet" id="sheet" aria-live="polite">
+    <div class="card">
+      <div class="grade" id="grade">라면 장인</div>
+      <div class="ml"><span id="mlNum">0</span><small>ml</small></div>
+      <div class="diff" id="diff"></div>
+      <div class="newbest" id="newbest" hidden>최고 기록 갱신</div>
+      <div class="comment" id="comment"></div>
+      <div class="row">
+        <button class="btn btn-main" id="retry"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const TARGET = 550, BOTTLE_CAP = 2000;
+
+// ---------- languages ----------
+// grade order: exact, <=5, <=15, <=40 over, <=40 under, <=100 over, <=100 under, >100 over, >100 under
+const I18N = {
+  ko:{
+    brand:'라면 물 맞추기', sub:'봉지라면 1개 · 지름 16cm 양은냄비',
+    hint:'화면을 꾹 누르면 물이 나와요', done:'다 부었어요', retry:'다시 도전', share:'X에 자랑하기',
+    newBest:'최고 기록 갱신', best:n=>'최고 기록 오차 '+n+'ml', diff:s=>'목표보다 <b>'+s+'</b>',
+    label:'맑은 샘물  2L', aria:'게임 화면. 누르고 있으면 물병이 기울어져 물이 나옵니다.',
+    tweet:(v,s,t)=>'라면 물 550ml 맞추기 🍜\n내 기록: '+v+'ml ('+s+') · '+t+'\n#라면물550',
+    grades:[
+      ['완벽한 550','정확히 550ml. 라면의 신이 내려왔어요.'],
+      ['라면 장인','면발이 살아 있는 황금 비율이에요.'],
+      ['꽤 하는데?','먹어 보면 거의 차이 없어요.'],
+      ['살짝 싱거움','국물이 조금 연해요. 그래도 맛있게 먹을 수 있어요.'],
+      ['살짝 짬','국물이 진해요. 물 한 컵 생각나는 맛.'],
+      ['국물 라면','건더기 찾으러 잠수해야 해요.'],
+      ['꾸덕 라면','국물보다 면이 많아요.'],
+      ['한강 라면','물 반 라면 반. 수영해도 되겠어요.'],
+      ['짜파게티화','이건 거의 볶음면이에요.']
+    ]
+  },
+  ja:{
+    brand:'ラーメンの水ぴったりチャレンジ', sub:'韓国の袋ラーメン1袋 · 直径16cmのアルミ鍋',
+    hint:'画面を長押しすると水が出ます', done:'注ぎ終わり', retry:'もう一度', share:'Xで自慢する',
+    newBest:'ベスト記録更新', best:n=>'ベスト記録 誤差'+n+'ml', diff:s=>'目標との差 <b>'+s+'</b>',
+    label:'天然水  2L', aria:'ゲーム画面。長押しするとペットボトルが傾いて水が出ます。',
+    tweet:(v,s,t)=>'ラーメンの水550mlチャレンジ 🍜\n記録: '+v+'ml ('+s+') · '+t+'\n#ラーメン水550',
+    grades:[
+      ['完璧な550','ぴったり550ml。ラーメンの神が降りてきた。'],
+      ['ラーメン職人','麺が生きる黄金比。'],
+      ['なかなかやるね','食べたらほとんど違いはありません。'],
+      ['ちょっと薄め','スープが少し薄い。でもおいしく食べられます。'],
+      ['ちょっと濃いめ','スープが濃い。水がほしくなる味。'],
+      ['スープラーメン','具を探すには潜らないと。'],
+      ['こってり麺','スープより麺が多い。'],
+      ['プールラーメン','水が多すぎて泳げそう。'],
+      ['焼きそば化','これはほぼ汁なし麺。']
+    ]
+  },
+  en:{
+    brand:'Ramen Water Challenge', sub:'1 pack of Korean ramen · 16cm aluminum pot',
+    hint:'Press and hold to pour', done:"I'm done", retry:'Try again', share:'Share on X',
+    newBest:'New best!', best:n=>'Best: '+n+'ml off', diff:s=>'Off by <b>'+s+'</b>',
+    label:'SPRING WATER  2L', aria:'Game screen. Press and hold to tilt the bottle and pour water.',
+    tweet:(v,s,t)=>'Ramen Water 550ml Challenge 🍜\nMy pour: '+v+'ml ('+s+') · '+t+'\n#Ramen550',
+    grades:[
+      ['Perfect 550','Exactly 550ml. The ramen gods have spoken.'],
+      ['Ramen Master','The golden ratio. Noodles at their best.'],
+      ['Not Bad!',"You'd barely taste the difference."],
+      ['A Bit Bland','The broth is a little weak, but still tasty.'],
+      ['A Bit Salty',"Strong broth. You'll want a glass of water."],
+      ['Soup Ramen',"You'll have to dive for the noodles."],
+      ['Thick Ramen','More noodles than soup.'],
+      ['Ramen Pool','Half water, half ramen. Grab a swimsuit.'],
+      ['Basically Stir-fry','This is pretty much dry noodles.']
+    ]
+  }
+};
+let lang = 'en';
+try{
+  const saved = localStorage.getItem('ramen550-lang');
+  if(saved && I18N[saved]) lang = saved;
+  else { const n=(navigator.language||'').toLowerCase(); lang = n.startsWith('ko')?'ko':n.startsWith('ja')?'ja':'en'; }
+}catch(e){}
+let lastResult = null;
+const POT_Y = 6.4, POT_INNER_R = 8, POT_FLOOR = 0.6, POT_H = 9.5;
+const WATER_BOTTOM = POT_Y + POT_FLOOR;
+const AREA = Math.PI * POT_INNER_R * POT_INNER_R;
+const MAX_TILT = 115, MAX_FLOW = 230;
+
+const stageEl = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+stageEl.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 400);
+const LOOK = new THREE.Vector3(5, 12, 0);
+const FIT_POINTS = [
+  [-13.5,0,10.5],[-13.5,0,-10.5],[13.5,0,10.5],[-13.5,5.6,10.5],[-13.5,5.6,-10.5],
+  [23.6,0,4],[23.6,20,4],[16.4,0,7.6],[20,0,13],
+  [-9.6,15.9,0],[0,15.9,-9.1],
+  [13.5,34,2.5],[9,33,2.5]
+];
+
+// lights
+scene.add(new THREE.HemisphereLight(0xf3fbff, 0xc9b9a0, 0.75));
+const sun = new THREE.DirectionalLight(0xffffff, 0.85);
+sun.position.set(-18, 40, 22);
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024,1024);
+const sc = sun.shadow.camera; sc.left=-30; sc.right=30; sc.top=30; sc.bottom=-30; sc.near=1; sc.far=100;
+sun.shadow.radius = 4;
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xfff1dc, 0.3); fill.position.set(20,10,-10); scene.add(fill);
+
+// ground shadow
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(200,200), new THREE.ShadowMaterial({opacity:0.13}));
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+
+// portable gas burner
+const burner = new THREE.Group(); scene.add(burner);
+const bodyMat = new THREE.MeshStandardMaterial({color:0xe6e9ec, roughness:0.45, metalness:0.15});
+const body = new THREE.Mesh(new THREE.BoxGeometry(27,5.6,21), bodyMat);
+body.position.y = 2.8; body.castShadow = body.receiveShadow = true; burner.add(body);
+const plate = new THREE.Mesh(new THREE.BoxGeometry(25,0.4,19), new THREE.MeshStandardMaterial({color:0x2b2f33, roughness:0.6}));
+plate.position.y = 5.8; plate.receiveShadow = true; burner.add(plate);
+const knob = new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,1,20), new THREE.MeshStandardMaterial({color:0xe0452b, roughness:0.5}));
+knob.rotation.x = Math.PI/2; knob.position.set(9,2.8,10.8); burner.add(knob);
+const gratMat = new THREE.MeshStandardMaterial({color:0x1d2124, roughness:0.5, metalness:0.4});
+for(let i=0;i<4;i++){
+  const g = new THREE.Mesh(new THREE.BoxGeometry(4,0.6,0.6), gratMat);
+  const a = i*Math.PI/2+Math.PI/4;
+  g.position.set(Math.cos(a)*6.5, 6.15, Math.sin(a)*6.5); g.rotation.y = -a; burner.add(g);
+}
+const flame = new THREE.Mesh(new THREE.TorusGeometry(3.2,0.45,8,32),
+  new THREE.MeshBasicMaterial({color:0x5aa7ff, transparent:true, opacity:0.0}));
+flame.rotation.x = Math.PI/2; flame.position.y = 6.2; burner.add(flame);
+
+// pot (양은냄비)
+const potMat = new THREE.MeshStandardMaterial({color:0xe7b347, metalness:0.55, roughness:0.32, side:THREE.DoubleSide});
+const prof = [
+  [0,0],[POT_INNER_R+0.35,0],[POT_INNER_R+0.55,0.35],[POT_INNER_R+0.55,POT_H-0.4],
+  [POT_INNER_R+1.05,POT_H-0.15],[POT_INNER_R+1.05,POT_H+0.1],[POT_INNER_R+0.6,POT_H+0.15],
+  [POT_INNER_R,POT_H-0.2],[POT_INNER_R,POT_FLOOR+0.2],[POT_INNER_R-0.2,POT_FLOOR],[0,POT_FLOOR]
+].map(p=>new THREE.Vector2(p[0],p[1]));
+const pot = new THREE.Mesh(new THREE.LatheGeometry(prof, 64), potMat);
+pot.position.y = POT_Y; pot.castShadow = true; pot.receiveShadow = true; scene.add(pot);
+// subtle hammered rings on outer wall
+const ringMat = new THREE.MeshStandardMaterial({color:0xd9a33a, metalness:0.55, roughness:0.4});
+for(let i=0;i<3;i++){
+  const r = new THREE.Mesh(new THREE.TorusGeometry(POT_INNER_R+0.57,0.05,6,64), ringMat);
+  r.rotation.x = Math.PI/2; r.position.y = POT_Y+2.2+i*2.4; scene.add(r);
+}
+// handles
+[1,-1].forEach(side=>{
+  const outer = new THREE.Group();
+  const h = new THREE.Mesh(new THREE.TorusGeometry(1.7,0.32,10,24,Math.PI), potMat);
+  h.rotation.x = Math.PI/2; h.castShadow = true;
+  outer.add(h); outer.rotation.y = side>0 ? Math.PI/2 : -Math.PI/2;
+  outer.position.set(side*(POT_INNER_R+0.5), POT_Y+POT_H-1.4, 0);
+  scene.add(outer);
+});
+
+// water in pot
+const waterMat = new THREE.MeshStandardMaterial({color:0x8fcbe8, transparent:true, opacity:0.72, roughness:0.15, metalness:0.05, side:THREE.DoubleSide});
+const waterSide = new THREE.Mesh(new THREE.CylinderGeometry(POT_INNER_R-0.04,POT_INNER_R-0.04,1,64,1,true), waterMat);
+scene.add(waterSide);
+const surfGeo = new THREE.RingGeometry(0.02, POT_INNER_R-0.04, 56, 12);
+surfGeo.rotateX(-Math.PI/2);
+const surfBase = surfGeo.attributes.position.array.slice();
+const surface = new THREE.Mesh(surfGeo, waterMat);
+scene.add(surface);
+
+// bottle
+const bottlePivot = new THREE.Group();
+const BOTTLE_REST = new THREE.Vector3(20, 10.02, 4);   // standing on the floor
+const BOTTLE_POUR = new THREE.Vector3(13.5, 21.5, 2.5); // lifted over the pot
+bottlePivot.position.copy(BOTTLE_REST);
+scene.add(bottlePivot);
+const bProf = [
+  [0,-10],[3.3,-10],[3.6,-9.6],[3.6,-6],[3.35,-5.3],[3.6,-4.6],[3.6,3.6],
+  [2.8,6.0],[1.35,7.6],[1.3,9.6],[1.15,9.7]
+].map(p=>new THREE.Vector2(p[0],p[1]));
+const bottleMat = new THREE.MeshPhysicalMaterial({color:0xdff3ff, transparent:true, opacity:0.35, roughness:0.05, metalness:0, side:THREE.DoubleSide, depthWrite:false});
+const bottle = new THREE.Mesh(new THREE.LatheGeometry(bProf, 40), bottleMat);
+bottle.castShadow = true;
+bottlePivot.add(bottle);
+// label
+const lc = document.createElement('canvas'); lc.width = 512; lc.height = 128;
+const lx = lc.getContext('2d');
+function drawLabel(t){
+  lx.fillStyle = '#ffffff'; lx.fillRect(0,0,512,128);
+  lx.fillStyle = '#3c9ad6'; lx.fillRect(0,0,512,22); lx.fillRect(0,106,512,22);
+  lx.fillStyle = '#22313a'; lx.font = 'bold 44px sans-serif'; lx.textAlign = 'center'; lx.textBaseline = 'middle';
+  lx.fillText(t, 256, 66);
+}
+drawLabel(I18N[lang].label);
+const labelTex = new THREE.CanvasTexture(lc); labelTex.encoding = THREE.sRGBEncoding;
+const label = new THREE.Mesh(new THREE.CylinderGeometry(3.63,3.63,4.2,40,1,true),
+  new THREE.MeshStandardMaterial({map:labelTex, roughness:0.6}));
+label.position.y = -1.6; label.rotation.y = -Math.PI*0.35; bottlePivot.add(label);
+const bWaterMat = new THREE.MeshStandardMaterial({color:0x8fcbe8, transparent:true, opacity:0.55, roughness:0.2});
+const bWater = new THREE.Mesh(new THREE.CylinderGeometry(3.35,3.35,1,32), bWaterMat);
+bottlePivot.add(bWater);
+const cap = new THREE.Mesh(new THREE.CylinderGeometry(1.45,1.45,1.3,24), new THREE.MeshStandardMaterial({color:0x3c9ad6, roughness:0.4}));
+cap.position.set(18,1.45,11); cap.rotation.z = Math.PI/2; cap.castShadow = true; scene.add(cap);
+
+// stream
+const streamMat = new THREE.MeshStandardMaterial({color:0xa9dcf3, transparent:true, opacity:0.8, roughness:0.1});
+let stream = null;
+
+// splash droplets
+const dropGeo = new THREE.SphereGeometry(0.18, 8, 6);
+const drops = [];
+for(let i=0;i<40;i++){
+  const m = new THREE.Mesh(dropGeo, streamMat); m.visible = false; scene.add(m);
+  drops.push({m, v:new THREE.Vector3(), life:0});
+}
+// steam
+const steamMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.0, depthWrite:false});
+const steams = [];
+for(let i=0;i<16;i++){
+  const m = new THREE.Mesh(new THREE.SphereGeometry(1,10,8), steamMat.clone()); m.visible=false; scene.add(m);
+  steams.push({m, life:Math.random()*3, seed:Math.random()*10});
+}
+// noodles
+const noodleGroup = new THREE.Group(); scene.add(noodleGroup);
+const noodleMat = new THREE.MeshStandardMaterial({color:0xf2c75c, roughness:0.55});
+const onionMat = new THREE.MeshStandardMaterial({color:0x6cbf4a, roughness:0.6});
+function buildNoodles(y){
+  while(noodleGroup.children.length){const c=noodleGroup.children.pop(); c.geometry.dispose();}
+  for(let n=0;n<9;n++){
+    const pts=[]; const cx=(Math.random()-0.5)*7, cz=(Math.random()-0.5)*7;
+    let a=Math.random()*6.28;
+    for(let k=0;k<14;k++){
+      a += 0.6 + Math.random()*0.5;
+      const r = 1.2 + Math.sin(k*1.7+n)*0.9 + k*0.22;
+      let x=cx+Math.cos(a)*r, z=cz+Math.sin(a)*r;
+      const d=Math.hypot(x,z), lim=POT_INNER_R-0.6; if(d>lim){x*=lim/d; z*=lim/d;}
+      pts.push(new THREE.Vector3(x, y+0.05+Math.sin(k)*0.06, z));
+    }
+    const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),70,0.17,6,false), noodleMat);
+    noodleGroup.add(tube);
+  }
+  for(let i=0;i<14;i++){
+    const o = new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.35,0.2,10,1,true), onionMat);
+    const a=Math.random()*6.28, r=Math.random()*(POT_INNER_R-1.2);
+    o.position.set(Math.cos(a)*r, y+0.18, Math.sin(a)*r); o.rotation.set(Math.random(),Math.random(),Math.random());
+    noodleGroup.add(o);
+  }
+}
+
+// ---------- state ----------
+let lift=0;
+let holding=false, tilt=0, flow=0, vol=0, remain=BOTTLE_CAP, phase='play', pourT=0;
+let brothMix=0, resultT=0, landing=new THREE.Vector3(0,WATER_BOTTOM,0);
+const waterColor = new THREE.Color(0x8fcbe8), brothColor = new THREE.Color(0xd8642c);
+
+const hintEl=document.getElementById('hint'), doneBtn=document.getElementById('done');
+const sheet=document.getElementById('sheet'), controls=document.getElementById('controls');
+const bestEl=document.getElementById('best');
+let best=null;
+try{ const b=localStorage.getItem('ramen550-best'); if(b!==null) best=+b; }catch(e){}
+function showBest(){ if(best!==null){ bestEl.hidden=false; bestEl.textContent=I18N[lang].best(best); } }
+
+const langBtns = document.querySelectorAll('.lang button');
+function applyLang(){
+  const T = I18N[lang];
+  document.documentElement.lang = lang;
+  document.getElementById('t-brand').textContent = T.brand;
+  document.getElementById('t-sub').textContent = T.sub;
+  hintEl.textContent = T.hint;
+  doneBtn.textContent = T.done;
+  document.getElementById('retry').textContent = T.retry;
+  document.getElementById('newbest').textContent = T.newBest;
+  stageEl.setAttribute('aria-label', T.aria);
+  langBtns.forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.l===lang)));
+  drawLabel(T.label); labelTex.needsUpdate = true;
+  showBest(); renderResult();
+}
+langBtns.forEach(b=>b.addEventListener('click', ()=>{
+  lang = b.dataset.l;
+  try{ localStorage.setItem('ramen550-lang', lang); }catch(_){}
+  applyLang();
+}));
+
+function gradeIdx(e){
+  const a=Math.abs(e);
+  if(a===0) return 0;
+  if(a<=5) return 1;
+  if(a<=15) return 2;
+  if(a<=40) return e>0?3:4;
+  if(a<=100) return e>0?5:6;
+  return e>0?7:8;
+}
+function renderResult(){
+  if(!lastResult) return;
+  const T=I18N[lang], {v,e,isNew}=lastResult, a=Math.abs(e);
+  const [title,comment]=T.grades[gradeIdx(e)];
+  const s=(e>0?'+':e<0?'−':'±')+a+'ml';
+  document.getElementById('grade').textContent=title;
+  document.getElementById('comment').textContent=comment;
+  document.getElementById('diff').innerHTML=T.diff(s);
+  document.getElementById('newbest').hidden=!isNew;
+}
+applyLang();
+
+// ---------- audio ----------
+let ac=null, noiseGain=null, bp=null;
+function initAudio(){
+  if(ac) { if(ac.state==='suspended') ac.resume(); return; }
+  try{
+    ac = new (window.AudioContext||window.webkitAudioContext)();
+    const len = ac.sampleRate*2, buf = ac.createBuffer(1,len,ac.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    const src = ac.createBufferSource(); src.buffer=buf; src.loop=true;
+    bp = ac.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=1.4; bp.frequency.value=700;
+    noiseGain = ac.createGain(); noiseGain.gain.value=0;
+    src.connect(bp); bp.connect(noiseGain); noiseGain.connect(ac.destination); src.start();
+  }catch(e){ ac=null; }
+}
+function ding(good){
+  if(!ac) return;
+  const notes = good ? [784,988,1319] : [523,659];
+  notes.forEach((f,i)=>{
+    const o=ac.createOscillator(), g=ac.createGain(); o.type='triangle'; o.frequency.value=f;
+    const t=ac.currentTime+i*0.11; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.18,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+0.5);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+0.55);
+  });
+}
+
+// ---------- input ----------
+stageEl.addEventListener('pointerdown', e=>{
+  if(phase!=='play') return;
+  initAudio(); holding=true;
+  try{ stageEl.setPointerCapture(e.pointerId); }catch(_){}
+  hintEl.style.opacity='0';
+});
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>stageEl.addEventListener(t,()=>{holding=false;}));
+stageEl.addEventListener('contextmenu', e=>e.preventDefault());
+window.addEventListener('keydown', e=>{ if(e.code==='Space' && phase==='play'){ e.preventDefault(); initAudio(); holding=true; hintEl.style.opacity='0'; }});
+window.addEventListener('keyup', e=>{ if(e.code==='Space') holding=false; });
+
+doneBtn.addEventListener('click', finish);
+document.getElementById('retry').addEventListener('click', reset);
+
+
+function finish(){
+  if(phase!=='play' || vol<=0) return;
+  phase='result'; holding=false; resultT=0;
+  controls.style.opacity='0';
+  const v=Math.round(vol), e=v-TARGET, a=Math.abs(e), good=a<=15;
+  const isNew = best===null || a<best;
+  if(isNew){ best=a; try{localStorage.setItem('ramen550-best',String(a));}catch(_){} showBest(); }
+  lastResult={v,e,isNew};
+  renderResult();
+  buildNoodles(WATER_BOTTOM + Math.max(vol/AREA,0.3));
+  noodleGroup.visible=false;
+  // count up
+  const numEl=document.getElementById('mlNum'); const t0=performance.now();
+  setTimeout(()=>{
+    sheet.classList.add('show');
+    (function step(now){
+      const k=Math.min(1,(now-t0-500)/900); const ease=1-Math.pow(1-Math.max(k,0),3);
+      numEl.textContent=Math.round(v*ease);
+      if(k<1) requestAnimationFrame(step); else ding(good);
+    })(performance.now());
+  }, 900);
+}
+
+function reset(){
+  phase='play'; vol=0; remain=BOTTLE_CAP; tilt=0; lift=0; flow=0; brothMix=0; holding=false;
+  noodleGroup.visible=false; sheet.classList.remove('show');
+  controls.style.opacity='1'; hintEl.style.opacity='1'; doneBtn.disabled=true;
+  flame.material.opacity=0;
+  steams.forEach(s=>s.m.visible=false);
+}
+
+// ---------- resize ----------
+function resize(){
+  const w=stageEl.clientWidth, h=stageEl.clientHeight;
+  renderer.setSize(w,h,false);
+  camera.aspect=w/h;
+  // move the camera as close as possible while every key point stays on screen
+  // (sides: small margin; top: room for the title; bottom: room for the button)
+  const dir = new THREE.Vector3(0, 0.56, 0.83).normalize();
+  const p = new THREE.Vector3();
+  for(let dist=24; dist<220; dist+=0.5){
+    camera.position.copy(LOOK).addScaledVector(dir, dist);
+    camera.lookAt(LOOK); camera.updateMatrixWorld(); camera.updateProjectionMatrix();
+    let ok = true;
+    for(const k of FIT_POINTS){
+      p.set(k[0],k[1],k[2]).project(camera);
+      if(Math.abs(p.x)>0.93 || p.y>0.5 || p.y<-0.66){ ok=false; break; }
+    }
+    if(ok) break;
+  }
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize); resize();
+
+// ---------- loop ----------
+const tmpV=new THREE.Vector3(), mouthLocal=new THREE.Vector3(0,9.7,0);
+let last=performance.now(), time=0;
+function loop(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now; time+=dt;
+
+  // tilt
+  // pick the bottle up from the floor first, then tilt; put it back down after
+  if(phase==='play' && holding){
+    lift=Math.min(1, lift+dt*3.2);
+    if(lift>=1) tilt=Math.min(MAX_TILT, tilt+78*dt);
+  } else {
+    tilt=Math.max(0, tilt-170*dt);
+    if(tilt===0) lift=Math.max(0, lift-dt*2.6);
+  }
+  const le = lift*lift*(3-2*lift);
+  bottlePivot.position.lerpVectors(BOTTLE_REST, BOTTLE_POUR, le);
+  bottlePivot.position.y += Math.sin(le*Math.PI)*2.5;
+  bottlePivot.rotation.z = THREE.MathUtils.degToRad(tilt);
+  bottlePivot.updateMatrixWorld();
+
+  // flow (threshold rises as bottle empties)
+  const thr = 52 + (1-remain/BOTTLE_CAP)*38;
+  const f = THREE.MathUtils.clamp((tilt-thr)/(MAX_TILT-thr),0,1);
+  const target = remain>0 ? MAX_FLOW*Math.pow(f,1.35) : 0;
+  flow += (target-flow)*Math.min(1, dt*(target>flow?10:7));
+  if(flow<0.5) flow=0;
+  const dv = Math.min(flow*dt, remain);
+  vol = Math.min(vol+dv, AREA*(POT_H-POT_FLOOR-0.3)); remain-=dv;
+  if(vol>0 && phase==='play' && flow===0 && !holding) doneBtn.disabled=false;
+  else if(phase==='play') doneBtn.disabled = vol<=0 || flow>0;
+
+  // pot water
+  const h=vol/AREA, surfY=WATER_BOTTOM+h;
+  waterSide.visible=surface.visible=vol>0.5;
+  waterSide.scale.y=Math.max(h,0.001); waterSide.position.y=WATER_BOTTOM+h/2;
+  surface.position.y=surfY;
+
+  // bottle water
+  const bh=Math.max(0.01,(remain/BOTTLE_CAP)*13.5);
+  bWater.visible=remain>1; bWater.scale.y=bh; bWater.position.y=-9.8+bh/2;
+
+  // stream
+  const mouth=bottlePivot.localToWorld(mouthLocal.clone());
+  if(flow>1){
+    const a=bottlePivot.rotation.z, dir=new THREE.Vector3(-Math.sin(a),Math.cos(a),0);
+    const fr=flow/MAX_FLOW, speed=4+16*fr;
+    const pts=[mouth.clone()]; const p=mouth.clone(), v=dir.multiplyScalar(speed);
+    for(let i=0;i<80;i++){
+      v.y-=70*0.016; p.addScaledVector(v,0.016);
+      if(p.y<=surfY){ p.y=surfY; pts.push(p.clone()); break; }
+      if(i%2===0) pts.push(p.clone());
+    }
+    if(pts.length<3) pts.push(p.clone().setY(surfY));
+    landing.copy(pts[pts.length-1]);
+    if(stream){ scene.remove(stream); stream.geometry.dispose(); }
+    stream=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),24,0.18+0.42*fr,8,false), streamMat);
+    scene.add(stream);
+    // spawn drops
+    const n = Math.random()<fr*1.2 ? 2 : 0;
+    for(let i=0;i<n;i++){
+      const d=drops.find(x=>x.life<=0); if(!d) break;
+      d.life=0.5+Math.random()*0.3; d.m.visible=true; d.m.position.copy(landing);
+      const ang=Math.random()*6.28, s=2+Math.random()*5*fr;
+      d.v.set(Math.cos(ang)*s, 5+Math.random()*9*fr, Math.sin(ang)*s);
+    }
+  } else if(stream){ scene.remove(stream); stream.geometry.dispose(); stream=null; }
+
+  drops.forEach(d=>{
+    if(d.life<=0) return;
+    d.life-=dt; d.v.y-=40*dt; d.m.position.addScaledVector(d.v,dt);
+    if(d.life<=0 || d.m.position.y<surfY-0.2){ d.life=0; d.m.visible=false; }
+  });
+
+  // surface ripples
+  const pos=surfGeo.attributes.position.array, fr=flow/MAX_FLOW;
+  const amp=0.05+0.28*fr, lx=landing.x, lz=landing.z-0;
+  for(let i=0;i<pos.length;i+=3){
+    const x=surfBase[i], z=surfBase[i+2];
+    const d=Math.hypot(x-lx,z-lz);
+    pos[i+1]=Math.sin(d*2.2-time*9)*amp*Math.exp(-d*0.22) + Math.sin(x*0.7+time*1.3)*0.03;
+  }
+  surfGeo.attributes.position.needsUpdate=true; surfGeo.computeVertexNormals();
+
+  // audio
+  if(noiseGain){
+    const fill=h/(POT_H-POT_FLOOR);
+    noiseGain.gain.setTargetAtTime(Math.min(0.35, fr*0.5), ac.currentTime, 0.04);
+    bp.frequency.setTargetAtTime(450+fill*2600+Math.random()*120, ac.currentTime, 0.05);
+  }
+
+  // result: broth, noodles, flame, steam
+  if(phase==='result'){
+    resultT+=dt;
+    flame.material.opacity=Math.min(0.85,resultT*1.5)*(0.85+Math.sin(time*30)*0.15);
+    flame.scale.setScalar(1+Math.sin(time*22)*0.04);
+    if(resultT>0.6){
+      brothMix=Math.min(1,brothMix+dt*0.9);
+      noodleGroup.visible=true;
+      noodleGroup.position.y = (1-brothMix)*1.5;
+    }
+    waterMat.color.copy(waterColor).lerp(brothColor,brothMix);
+    waterMat.opacity=0.72+0.2*brothMix;
+    if(resultT>1){
+      steams.forEach(s=>{
+        s.life+=dt; if(s.life>3){ s.life=0; }
+        const k=s.life/3; s.m.visible=true;
+        s.m.position.set(Math.sin(s.seed+k*3)*2.5+(s.seed%4-2), surfY+0.5+k*12, Math.cos(s.seed*1.7)*3);
+        s.m.scale.setScalar(0.8+k*2.2);
+        s.m.material.opacity=Math.sin(k*Math.PI)*0.28*Math.min(1,resultT-1);
+      });
+    }
+  } else {
+    waterMat.color.copy(waterColor); waterMat.opacity=0.72;
+  }
+
+  renderer.render(scene,camera);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
